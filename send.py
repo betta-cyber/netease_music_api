@@ -1,9 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @Author: betta
+# @Author: omi
+# @Date:   2014-08-24 21:51:57
+# @Last Modified by:   omi
+# @Last Modified time: 2015-07-30 21:21:15
+
 
 '''
-netease music api
+网易云音乐 Api
 '''
 
 import re
@@ -23,31 +27,31 @@ from storage import Storage
 import MySQLdb
 import time
 
-# # 歌曲榜单地址
-# top_list_all = {
-#     0: ['云音乐新歌榜', '/discover/toplist?id=3779629'],
-#     1: ['云音乐热歌榜', '/discover/toplist?id=3778678'],
-#     2: ['网易原创歌曲榜', '/discover/toplist?id=2884035'],
-#     3: ['云音乐飙升榜', '/discover/toplist?id=19723756'],
-#     4: ['云音乐电音榜', '/discover/toplist?id=10520166'],
-#     5: ['UK排行榜周榜', '/discover/toplist?id=180106'],
-#     6: ['美国Billboard周榜', '/discover/toplist?id=60198'],
-#     7: ['KTV嗨榜', '/discover/toplist?id=21845217'],
-#     8: ['iTunes榜', '/discover/toplist?id=11641012'],
-#     9: ['Hit FM Top榜', '/discover/toplist?id=120001'],
-#     10: ['日本Oricon周榜', '/discover/toplist?id=60131'],
-#     11: ['韩国Melon排行榜周榜', '/discover/toplist?id=3733003'],
-#     12: ['韩国Mnet排行榜周榜', '/discover/toplist?id=60255'],
-#     13: ['韩国Melon原声周榜', '/discover/toplist?id=46772709'],
-#     14: ['中国TOP排行榜(港台榜)', '/discover/toplist?id=112504'],
-#     15: ['中国TOP排行榜(内地榜)', '/discover/toplist?id=64016'],
-#     16: ['香港电台中文歌曲龙虎榜', '/discover/toplist?id=10169002'],
-#     17: ['华语金曲榜', '/discover/toplist?id=4395559'],
-#     18: ['中国嘻哈榜', '/discover/toplist?id=1899724'],
-#     19: ['法国 NRJ EuroHot 30周榜', '/discover/toplist?id=27135204'],
-#     20: ['台湾Hito排行榜', '/discover/toplist?id=112463'],
-#     21: ['Beatport全球电子舞曲榜', '/discover/toplist?id=3812895']
-# }
+# 歌曲榜单地址
+top_list_all = {
+    0: ['云音乐新歌榜', '/discover/toplist?id=3779629'],
+    1: ['云音乐热歌榜', '/discover/toplist?id=3778678'],
+    2: ['网易原创歌曲榜', '/discover/toplist?id=2884035'],
+    3: ['云音乐飙升榜', '/discover/toplist?id=19723756'],
+    4: ['云音乐电音榜', '/discover/toplist?id=10520166'],
+    5: ['UK排行榜周榜', '/discover/toplist?id=180106'],
+    6: ['美国Billboard周榜', '/discover/toplist?id=60198'],
+    7: ['KTV嗨榜', '/discover/toplist?id=21845217'],
+    8: ['iTunes榜', '/discover/toplist?id=11641012'],
+    9: ['Hit FM Top榜', '/discover/toplist?id=120001'],
+    10: ['日本Oricon周榜', '/discover/toplist?id=60131'],
+    11: ['韩国Melon排行榜周榜', '/discover/toplist?id=3733003'],
+    12: ['韩国Mnet排行榜周榜', '/discover/toplist?id=60255'],
+    13: ['韩国Melon原声周榜', '/discover/toplist?id=46772709'],
+    14: ['中国TOP排行榜(港台榜)', '/discover/toplist?id=112504'],
+    15: ['中国TOP排行榜(内地榜)', '/discover/toplist?id=64016'],
+    16: ['香港电台中文歌曲龙虎榜', '/discover/toplist?id=10169002'],
+    17: ['华语金曲榜', '/discover/toplist?id=4395559'],
+    18: ['中国嘻哈榜', '/discover/toplist?id=1899724'],
+    19: ['法国 NRJ EuroHot 30周榜', '/discover/toplist?id=27135204'],
+    20: ['台湾Hito排行榜', '/discover/toplist?id=112463'],
+    21: ['Beatport全球电子舞曲榜', '/discover/toplist?id=3812895']
+}
 
 default_timeout = 10
 
@@ -76,12 +80,14 @@ def encrypted_id(id):
 def encrypted_request(text):
     text = json.dumps(text)
     secKey = createSecretKey(16)
+    #secKey = 'CLlbBDi5bqCn92Uu'
     encText = aesEncrypt(aesEncrypt(text, nonce), secKey)
     encSecKey = rsaEncrypt(secKey, pubKey, modulus)
     data = {
         'params': encText,
         'encSecKey': encSecKey
     }
+    #print(data)
     return data
 
 def aesEncrypt(text, secKey):
@@ -96,7 +102,9 @@ def aesEncrypt(text, secKey):
 def rsaEncrypt(text, pubKey, modulus):
     text = text[::-1]
     rs = pow(int(text.encode('hex'), 16),  int(pubKey, 16), int(modulus, 16))
+    #print(format(rs, 'x'))
     return format(rs, 'x').zfill(256)
+
 
 def createSecretKey(size):
     return (''.join(map(lambda xx: (hex(ord(xx))[2:]), os.urandom(size))))[0:16]
@@ -124,7 +132,6 @@ def geturl(song):
         quality = 'LD'
     else:
         return song['mp3Url'], ''
-        
 
     quality = quality + ' {0}k'.format(music['bitrate'] / 1000)
     song_id = str(music['dfsId'])
@@ -142,7 +149,7 @@ class NetEase:
             'Connection': 'keep-alive',
             'Content-Type': 'application/x-www-form-urlencoded',
             'Host': 'music.163.com',
-            'Referer': 'http://music.163.com/',
+            'Referer': 'http://music.163.com/search/',
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.152 Safari/537.36'
         }
         self.cookies = {
@@ -212,7 +219,7 @@ class NetEase:
         pattern = re.compile(r'^0\d{2,3}\d{7,8}$|^1[34578]\d{9}$')
         if (pattern.match(username)):
             return self.phone_login(username, password)
-        action = 'http://music.163.com/weapi/login'
+        action = 'https://music.163.com/weapi/login/'
         text = {
             'username': username,
             'password': password,
@@ -317,35 +324,6 @@ class NetEase:
                 return "已经关注"
         except:
             return False
-            
-    def record(self, uid):
-        try:
-            action = 'http://music.163.com/weapi/v1/play/record?csrf_token='
-            self.session.cookies.load()
-            csrf = ""
-            for cookie in self.session.cookies:
-                if cookie.name == "__csrf":
-                    csrf = cookie.value
-            if csrf == "":
-                return False
-            action += csrf
-            req = {
-                "offset": 0,
-                "total": True,
-                "limit": 100,
-                "type": 1,
-                "uid": uid,
-                "csrf_token": csrf
-            }
-            page = self.session.post(action, data=encrypted_request(req), headers=self.header, timeout=default_timeout)
-            print(page.text)
-            results = json.loads(page.text)
-            if results["code"] == 200:
-                return True
-            elif results["code"] == 201:
-                return "11"
-        except:
-            return False
 
     def sendmail(self, userIds, msg):
         try:
@@ -398,10 +376,7 @@ class NetEase:
         except:
             return False
 
-
-    # /**
-    # 收藏歌单
-    # **/
+    #http://music.163.com/weapi/playlist/subscribe/?csrf_token=caefa7b62349f5cbe9f073c6542be7df
     def add_playlist(self, playlist_id):
         try:
             action = 'http://music.163.com/weapi/playlist/subscribe/?csrf_token='
@@ -427,7 +402,6 @@ class NetEase:
                 return "已经收藏过了"
         except:
             return False
-
 
     def like(self, eid, origin, threadId):
         try:
@@ -606,40 +580,13 @@ class NetEase:
             return []
 
     # song id --> song url ( details )
-    # def song_detail(self, music_id):
-    #     action = "http://music.163.com/api/song/detail/?id=" + str(music_id) + "&ids=[" + str(music_id) + "]"
-    #     try:
-    #         data = self.httpRequest('GET', action)
-    #         return data['songs']
-    #     except:
-    #         return []
-            
     def song_detail(self, music_id):
+        action = "http://music.163.com/api/song/detail/?id=" + str(music_id) + "&ids=[" + str(music_id) + "]"
         try:
-            action = 'http://music.163.com/weapi/song/enhance/player/url?csrf_token='
-            self.session.cookies.load()
-            csrf = ""
-            for cookie in self.session.cookies:
-                if cookie.name == "__csrf":
-                    csrf = cookie.value
-            if csrf == "":
-                return False
-            action += csrf
-            req = {
-                "ids": music_id,
-                "br": 999999,
-                "csrf_token": csrf
-            }
-            page = self.session.post(action, data=encrypted_request(req), headers=self.header, timeout=default_timeout)
-            print(page.text)
-            results = json.loads(page.text)
-            if results["code"] == 200:
-                return True
-            elif results["code"] == 201:
-                return "11"
+            data = self.httpRequest('GET', action)
+            return data['songs']
         except:
-            return False
-            
+            return []
 
     # lyric http://music.163.com/api/song/lyric?os=osx&id= &lv=-1&kv=-1&tv=-1
     def song_lyric(self, music_id):
@@ -791,46 +738,41 @@ class NetEase:
 
         return temp
 
-# def insert_user(nickname, user_id):
-#     conn = MySQLdb.connect(host= "localhost",user="root",passwd="root",db="netease_music")
-#     x = conn.cursor()
-#     exist = "select * from users where user_id = (%s)"
-#     e = x.execute(exist,(user_id,))
-#     if(e == 0):
-#         sql = "insert into users(nickname, user_id) values(%s,%s)"
-#         param = (nickname,user_id)
-#
-#         x.execute(sql,param)
-#         print "success" , i
-#     else:
-#         print "exist"
-#     conn.commit()
-#     conn.close()
+def select_user(i):
+    a = NetEase()
+    user_info = {}
+    userids = []
+    start = 210+i*100
+    #local_account = 'shokill@163.com'
+    #local_password = hashlib.md5('killer551').hexdigest()
+    #login_info = a.login(local_account, local_password)
+    #print login_info
+    msg = "我是一位来自未来世界的人工智能，代号“诺伊”，在网易云音乐这个平台，我期待能和大家一起分享音乐带给人类的各种情感，还希望大家可以私信我各种你所喜爱的歌曲以及你听音乐时的那份独特的情感，通过大家的分享，我可以去深度学习更多的人类情感及音乐品味。我会经过计算挑选出最棒的音乐分享然后私信给全部的用户，还会定时根据大家最喜爱一些音乐，加以演算，整理成一份来自未来的歌单。所以还在等待些什么呢？快关注诺伊，帮助诺伊完成使命吧！"
+    conn = MySQLdb.connect(host= "localhost",user="root",passwd="root",db="netease_music")
+    x = conn.cursor()
+    exist = "select * from users limit %s, 100"
+    e = x.execute(exist, (start,))
+    for row in x:
+        nickname = row[2]
+        userid = row[3]
+        userids.append(userid);
+    conn.commit()
+    conn.close()
+    #userids = [30395352, 277431765]
+    print userids
+    a.sendmail(userids,msg)
 
-a = NetEase()
-user_info = {}
-local_account = 'lightstrawberry@163.com'
+x = 485
+while True:
+    print "To infinity and beyond! We're getting close, on %d now!" % (x)
+    select_user(x)
+    x += 1
+    time.sleep(8)
+# local_account = 'lightstrawberry@163.com'
 # #local_account = 'vlg617@163.com'
-local_password = hashlib.md5('countme').hexdigest()
-# login_info = a.login(local_account, local_password)
-# print login_info
-# print(login_info)
-# b = a.record(30395352)
-# b = a.add_playlist(635780038)
-# print b
-
-print a.song_detail([33991591, 25731497])
+# local_password = hashlib.md5('countme').hexdigest()
+# #login_info = a.login(local_account, local_password)
+# #print(login_info)
 #
-# kk = a.sendmail('[30395352]', "http://music.163.com/#/playlist?id=93303640")
+# kk = a.sendmail('[108405103]', "啊啊啊啊")
 # print(kk)
-# for i in range(1003204, 2000000):
-#     user_info = a.user_playlist(i);
-#     if(user_info != []):
-#         if(user_info[0]['creator'] != None):
-#             user_id = user_info[0]['creator']['userId']
-#             nickname = user_info[0]['creator']['nickname']
-#             insert_user(nickname, user_id)
-#         else:
-#             print "账号已注销"
-#     else:
-#         print "false", i

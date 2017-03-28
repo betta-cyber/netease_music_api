@@ -14,17 +14,15 @@ from Crypto.Cipher import AES
 from cookielib import LWPCookieJar
 from bs4 import BeautifulSoup
 import time
-import logger
 import hashlib
 import random
 import base64
-from config import Config
 from storage import Storage
 
 
 default_timeout = 10
 
-log = logger.getLogger(__name__)
+# log = logger.getLogger(__name__)
 
 modulus = '00e0b509f6259df8642dbc35662901477df22677ec152b5ff68ace615bb7b725152b3ab17a876aea8a5aa76d2e417629ec4ee341f56135fccf695280104e0312ecbda92557c93870114af6c9d05c4f7f0c3685b7a46bee255932575cce10b424d813cfe4875d3e82047b97ddef52741d546b8e289dc6935b3ece0462db0a22b8e7'
 nonce = '0CoJUm6Qyw8W8jud'
@@ -83,27 +81,27 @@ def uniq(arr):
 
 
 # 获取高音质mp3 url
-def geturl(song):
-    config = Config()
-    quality = Config().get_item("music_quality")
-    if song['hMusic'] and quality <= 0:
-        music = song['hMusic']
-        quality = 'HD'
-    elif song['mMusic'] and quality <= 1:
-        music = song['mMusic']
-        quality = 'MD'
-    elif song['lMusic'] and quality <= 2:
-        music = song['lMusic']
-        quality = 'LD'
-    else:
-        return song['mp3Url'], ''
-        
-
-    quality = quality + ' {0}k'.format(music['bitrate'] / 1000)
-    song_id = str(music['dfsId'])
-    enc_id = encrypted_id(song_id)
-    url = "http://m%s.music.126.net/%s/%s.mp3" % (random.randrange(1, 3), enc_id, song_id)
-    return url, quality
+# def geturl(song):
+#     config = Config()
+#     quality = Config().get_item("music_quality")
+#     if song['hMusic'] and quality <= 0:
+#         music = song['hMusic']
+#         quality = 'HD'
+#     elif song['mMusic'] and quality <= 1:
+#         music = song['mMusic']
+#         quality = 'MD'
+#     elif song['lMusic'] and quality <= 2:
+#         music = song['lMusic']
+#         quality = 'LD'
+#     else:
+#         return song['mp3Url'], ''
+#         
+# 
+#     quality = quality + ' {0}k'.format(music['bitrate'] / 1000)
+#     song_id = str(music['dfsId'])
+#     enc_id = encrypted_id(song_id)
+#     url = "http://m%s.music.126.net/%s/%s.mp3" % (random.randrange(1, 3), enc_id, song_id)
+#     return url, quality
 
 
 class NetEase:

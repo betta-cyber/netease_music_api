@@ -20,7 +20,7 @@ joker = NetEase()
 user_info = {}
 local_account = 'lightstrawberry@163.com'
 local_password = '3ca73b783f9735a749bb0192face29f3'
-# login_info = a.login(local_account, local_password)
+# login_info = joker.login(local_account, local_password)
 # print login_info
 
 songdir = "songs_dir"
@@ -36,9 +36,7 @@ need_download_songs = {}
 for i in song_list_detail:
     song_name = i['name'] + "-" + i['artists'][0]['name']
     need_download_songs[i['id']] = song_name
-
-print need_download_songs
-
+    
 
 song_details = joker.song_detail(list(need_download_songs.keys()))['data']
 

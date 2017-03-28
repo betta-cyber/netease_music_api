@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-# @Author: Catofes
-# @Date:   2015-08-15
 
 
 '''

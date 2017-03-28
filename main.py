@@ -45,6 +45,7 @@ for song in song_details:
     song_br = song['br']
     songname = need_download_songs[song['id']]
     
+    
     filename = "./" + songdir + "/" + songname + ".flac"
     
     f = urllib2.urlopen(songlink)
@@ -56,8 +57,8 @@ for song in song_details:
     #         code.write(f.read())
     # if int(song_br) <= 320000:
     #     print "%s not have SQ music. Finding next song...\n" % songname
-    # else:
-    #     print "%s is already downloaded. Finding next song...\n" % songname
+    else:
+        print "%s is already downloaded. Finding next song...\n" % songname
         
 print "\n================================================================\n"
 print "Download finish!\nSongs' directory is " + os.getcwd() + "/songs_dir"

@@ -605,8 +605,6 @@ class NetEase:
             results = json.loads(page.text)
             if results["code"] == 200:
                 return results
-            else:
-                return 0
         except:
             return 0
             
@@ -760,3 +758,27 @@ class NetEase:
             temp = self.playlist_class_dict[data]
 
         return temp
+
+
+    def track_playlist_add(self, trackIds):
+        try:
+            action = 'http://music.163.com/weapi/playlist/manipulate/tracks?csrf_token='
+            self.session.cookies.load()
+            csrf = ""
+            for cookie in self.session.cookies:
+                if cookie.name == "__csrf":
+                    csrf = cookie.value
+            if csrf == "":
+                return False
+            action += csrf
+            req = {
+                "op": "add",
+                "pid": "644264533",
+                "trackIds": trackIds,
+                "csrf_token": csrf
+            }
+            page = self.session.post(action, data=encrypted_request(req), headers=self.header, timeout=default_timeout)
+            results = json.loads(page.text)
+            return results
+        except:
+            return 0

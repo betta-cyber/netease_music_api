@@ -760,7 +760,7 @@ class NetEase:
         return temp
 
 
-    def track_playlist_add(self, trackIds):
+    def track_playlist_add(self, pid, trackIds):
         try:
             action = 'http://music.163.com/weapi/playlist/manipulate/tracks?csrf_token='
             self.session.cookies.load()
@@ -773,7 +773,7 @@ class NetEase:
             action += csrf
             req = {
                 "op": "add",
-                "pid": "644264533",
+                "pid": pid,
                 "trackIds": trackIds,
                 "csrf_token": csrf
             }
@@ -781,4 +781,6 @@ class NetEase:
             results = json.loads(page.text)
             return results
         except:
-            return 0
+            results = {}
+            results['code'] = 100
+            return results

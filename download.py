@@ -1,78 +1,87 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @Author: betta
-
-'''
-netease music api
-'''
-
-from api import NetEase
-import re
-import requests
-import json
+ 
+import threading
 import urllib2
-import os
 import sys
-
-
-joker = NetEase()
-user_info = {}
-local_account = 'lightstrawberry@163.com'
-local_password = '3ca73b783f9735a749bb0192face29f3'
-# login_info = a.login(local_account, local_password)
-# print login_info
-
-songdir = "songs_dir"
-if not os.path.exists(songdir):
-    os.makedirs(songdir)
-
-print "fetching msg from " + sys.argv[1] + "\n"
-
-song_list_detail = joker.playlist_detail(sys.argv[1])
-
-
-need_download_songs = {}
-for i in song_list_detail:
-    song_name = i['name'] + "-" + i['artists'][0]['name']
-    need_download_songs[i['id']] = song_name
-
-print need_download_songs
-
-
-song_details = joker.song_detail(list(need_download_songs.keys()))['data']
-
-for song in song_details:
-    songlink = song['url']
-    song_br = song['br']
-    songname = need_download_songs[song['id']]
+import datetime
+ 
+max_thread = 10
+# 初始化锁
+lock = threading.RLock()
+ 
+class Downloader(threading.Thread):
+    def __init__(self, url, start_size, end_size, fobj, buffer):
+        self.url = url
+        self.buffer = buffer
+        self.start_size = start_size
+        self.end_size = end_size
+        self.fobj = fobj
+        threading.Thread.__init__(self)
+ 
+    def run(self):
+        # with lock:
+        #     # print 'starting: %s' % self.getName()
+        self._download()
+ 
+    def _download(self):
+        req = urllib2.Request(self.url)
+        # 添加HTTP Header(RANGE)设置下载数据的范围
+        req.headers['Range'] = 'bytes=%s-%s' % (self.start_size, self.end_size)
+        f = urllib2.urlopen(req)
+        # 初始化当前线程文件对象偏移量
+        offset = self.start_size
+        while 1:
+            block = f.read(self.buffer)
+            # 当前线程数据获取完毕后则退出
+            if not block:
+                with lock:
+                    # print '%s done.' % self.getName()
+                    break
+            # 写如数据的时候当然要锁住线程
+            # 使用 with lock 替代传统的 lock.acquire().....lock.release()
+            # 需要python >= 2.5
+            with lock:
+                # 设置文件对象偏移地址
+                self.fobj.seek(offset)
+                # 写入获取到的数据
+                self.fobj.write(block)
+                offset = offset + len(block)
+ 
+ 
+def main_download(url, thread=3, save_file='', buffer=1024):
+    start = datetime.datetime.now().replace(microsecond=0)  
     
-    filename = "./" + songdir + "/" + songname + ".flac"
+    # 最大线程数量不能超过max_thread
+    thread = thread if thread <= max_thread else max_thread
+    # 获取文件的大小
+    req = urllib2.urlopen(url)
+    size = int(req.info().getheaders('Content-Length')[0])
+    # 初始化文件对象
+    fobj = open(save_file, 'wb')
+    # 根据线程数量计算 每个线程负责的http Range 大小
+    avg_size, pad_size = divmod(size, thread)
+    plist = []
+    for i in xrange(thread):
+        start_size = i*avg_size
+        end_size = start_size + avg_size - 1
+        if i == thread - 1:
+            # 最后一个线程加上pad_size
+            end_size = end_size + pad_size + 1
+        t = Downloader(url, start_size, end_size, fobj, buffer)
+        plist.append(t)
+ 
+    #  开始download
+    for t in plist:
+        t.start()
+ 
+    # 等待所有线程结束
+    for t in plist:
+        t.join()
+ 
+    # 结束当然记得关闭文件对象
+    fobj.close()
+    print 'Download completed!'
     
-    f = urllib2.urlopen(songlink)
-    headers = f.headers
-    if not os.path.isfile(filename) and int(song_br) > 320000:
-        print "%s is downloading now ......\n" % filename
-        with open(filename, "wb") as code:
-            code.write(f.read())
-    if int(song_br) <= 320000:
-        print "%s not have SQ music. Finding next song...\n" % songname
-    else:
-        print "%s is already downloaded. Finding next song...\n" % songname
-        
-print "\n================================================================\n"
-print "Download finish!\nSongs' directory is " + os.getcwd() + "/songs_dir"
-
-#
-# kk = a.sendmail('[30395352]', "http://music.163.com/#/playlist?id=93303640")
-# print(kk)
-# for i in range(1003204, 2000000):
-#     user_info = a.user_playlist(i);
-#     if(user_info != []):
-#         if(user_info[0]['creator'] != None):
-#             user_id = user_info[0]['creator']['userId']
-#             nickname = user_info[0]['creator']['nickname']
-#             insert_user(nickname, user_id)
-#         else:
-#             print "账号已注销"
-#     else:
-#         print "false", i
+    end = datetime.datetime.now().replace(microsecond=0)
+    print("用时: ")
+    print(end-start)

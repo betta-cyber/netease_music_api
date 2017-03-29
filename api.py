@@ -95,8 +95,8 @@ def uniq(arr):
 #         quality = 'LD'
 #     else:
 #         return song['mp3Url'], ''
-#         
-# 
+#
+#
 #     quality = quality + ' {0}k'.format(music['bitrate'] / 1000)
 #     song_id = str(music['dfsId'])
 #     enc_id = encrypted_id(song_id)
@@ -288,7 +288,7 @@ class NetEase:
                 return "已经关注"
         except:
             return False
-            
+
     def record(self, uid):
         try:
             action = 'http://music.163.com/weapi/v1/play/record?csrf_token='
@@ -577,14 +577,14 @@ class NetEase:
             return []
 
     # song id --> song url ( details )
-    # def song_detail(self, music_id):
-    #     action = "http://music.163.com/api/song/detail/?id=" + str(music_id) + "&ids=[" + str(music_id) + "]"
-    #     try:
-    #         data = self.httpRequest('GET', action)
-    #         return data['songs']
-    #     except:
-    #         return []
-            
+    def song_info(self, music_id):
+        action = "http://music.163.com/api/song/detail/?id=" + str(music_id) + "&ids=[" + str(music_id) + "]"
+        try:
+            data = self.httpRequest('GET', action)
+            return data['songs']
+        except:
+            return []
+
     def song_detail(self, music_id):
         try:
             action = 'http://music.163.com/weapi/song/enhance/player/url?csrf_token='
@@ -607,7 +607,7 @@ class NetEase:
                 return results
         except:
             return 0
-            
+
 
     # lyric http://music.163.com/api/song/lyric?os=osx&id= &lv=-1&kv=-1&tv=-1
     def song_lyric(self, music_id):
@@ -784,3 +784,24 @@ class NetEase:
             results = {}
             results['code'] = 100
             return results
+
+    def track_log(self, song_id, play_time, songlist_id):
+        try:
+            action = 'http://music.163.com/weapi/feedback/weblog?csrf_token='
+            self.session.cookies.load()
+            csrf = ""
+            for cookie in self.session.cookies:
+                if cookie.name == "__csrf":
+                    csrf = cookie.value
+            if csrf == "":
+                return False
+            action += csrf
+            req = {
+                "logs": '[{"action": "play","json":{"type": "song","wifi": 0,"download": 0,"id": %s,"time": %s,"end": "ui","source": "list","sourceId": %s}}]' % (song_id, play_time, songlist_id),
+                "csrf_token": csrf
+            }
+            page = self.session.post(action, data=encrypted_request(req), headers=self.header, timeout=default_timeout)
+            results = json.loads(page.text)
+            return results
+        except:
+            return {}

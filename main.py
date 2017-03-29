@@ -36,7 +36,7 @@ need_download_songs = {}
 for i in song_list_detail:
     song_name = i['name'] + "-" + i['artists'][0]['name']
     need_download_songs[i['id']] = song_name
-    
+
 
 song_details = joker.song_detail(list(need_download_songs.keys()))['data']
 
@@ -44,10 +44,10 @@ for song in song_details:
     songlink = song['url']
     song_br = song['br']
     songname = need_download_songs[song['id']]
-    
-    
+
+
     filename = "./" + songdir + "/" + songname + ".flac"
-    
+
     f = urllib2.urlopen(songlink)
     headers = f.headers
     if not os.path.isfile(filename) and int(song_br) > 320000:
@@ -59,7 +59,7 @@ for song in song_details:
     #     print "%s not have SQ music. Finding next song...\n" % songname
     else:
         print "%s is already downloaded. Finding next song...\n" % songname
-        
+
 print "\n================================================================\n"
 print "Download finish!\nSongs' directory is " + os.getcwd() + "/songs_dir"
 

@@ -343,7 +343,7 @@ class NetEase:
         except:
             return False
 
-    def initProfile(self, nickname, captchaId, captcha):
+    def initProfile(self, nickname, dragPwd):
         try:
             action = 'http://music.163.com/weapi/activate/initProfile?csrf_token='
             self.session.cookies.load()
@@ -355,9 +355,9 @@ class NetEase:
                 return False
             action += csrf
             req = {
+                "dragPwd": dragPwd,
                 "nickname": nickname,
-                "captchaId": captchaId,
-                "captcha": captcha,
+                "csrf": csrf
             }
             page = self.session.post(action, data=encrypted_request(req), headers=self.header, timeout=default_timeout)
             print(page.text)
@@ -798,6 +798,52 @@ class NetEase:
             action += csrf
             req = {
                 "logs": '[{"action": "play","json":{"type": "song","wifi": 0,"download": 0,"id": %s,"time": %s,"end": "ui","source": "list","sourceId": %s}}]' % (song_id, play_time, songlist_id),
+                "csrf_token": csrf
+            }
+            page = self.session.post(action, data=encrypted_request(req), headers=self.header, timeout=default_timeout)
+            results = json.loads(page.text)
+            return results
+        except:
+            return {}
+            
+    def create_new_songlist(self, name):
+        try:
+            action = 'http://music.163.com/weapi/playlist/create?csrf_token='
+            self.session.cookies.load()
+            csrf = ""
+            for cookie in self.session.cookies:
+                if cookie.name == "__csrf":
+                    csrf = cookie.value
+            if csrf == "":
+                return False
+            action += csrf
+            req = {
+                "name": name,
+                "csrf_token": csrf
+            }
+            page = self.session.post(action, data=encrypted_request(req), headers=self.header, timeout=default_timeout)
+            results = json.loads(page.text)
+            return results
+        except:
+            return {}
+            
+    
+    def send_song_list_mail(self, songlist_id, msg, userIds):
+        try:
+            action = 'http://music.163.com/weapi/msg/private/send?csrf_token='
+            self.session.cookies.load()
+            csrf = ""
+            for cookie in self.session.cookies:
+                if cookie.name == "__csrf":
+                    csrf = cookie.value
+            if csrf == "":
+                return False
+            action += csrf
+            req = {
+                "id": songlist_id,
+                "type": "playlist",
+                "msg": msg,
+                "userIds": userIds,
                 "csrf_token": csrf
             }
             page = self.session.post(action, data=encrypted_request(req), headers=self.header, timeout=default_timeout)

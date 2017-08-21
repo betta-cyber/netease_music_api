@@ -8,45 +8,58 @@ netease music api
 
 from api import NetEase
 from download import main_download
-import re
-import requests
-import json
-import urllib2
-import os
-import sys
 import time
 
 # 考虑到歌单最多10000首歌，故采用多个歌单
 wait_song_list = [644264533, 644752348, 644765343, 644738922, 644776005, 644749639, 644756477, 644818427, 644835023, 644810557,
-             644806753, 644811524, 644800922, 644793786, 645856190, 645716416, 645721168, 645709462]
-back_song_list = [324361848, 324398635, 146240794, 395729931]
+                  644806753, 644811524, 644800922, 644793786]
+# wait_song_list = [644810557, 644806753, 644811524, 644800922, 644793786]
+back_song_list = [583517654, 431743699]
 
 joker = NetEase()
 user_info = {}
 local_account = 'lightstrawberry@163.com'
 local_password = '3ca73b783f9735a749bb0192face29f3'
-# login_info = joker.login(local_account, local_password)
-# print login_info
+#login_info = joker.login(local_account, local_password)
+#print login_info
 
-for i in wait_song_list:
-    print "current %s" % i
-    need_add_track_logs = []
-    song_list_detail = joker.playlist_detail(i)
-    for song_detail in song_list_detail:
-        need_add_track_logs.append(song_detail['id'])
-    print need_add_track_logs
 
-    for song_id in need_add_track_logs:
-        song_info = joker.song_info(song_id)
-        # print song_info
+print joker.song_info(186049)
+# print joker.add_playlist(732998840)
+
+for i in range(462686663, 500000000):
+    song_info = joker.song_info(i)
+    if song_info:
+        print song_info
         try:
             play_time = song_info[0]['bMusic']['playTime']/1000
         except IndexError:
             play_time = 60
-        # print play_time/1000
-        # print current_song_list
-        print 'finish', song_id, joker.track_log(song_id, play_time, i)
-        time.sleep(2)
+
+        print 'finish', i, joker.track_log(462686663, play_time)
+        time.sleep(1)
+
+
+#for i in reversed(back_song_list):
+#    print "current %s" % i
+#    need_add_track_logs = []
+#    song_list_detail = joker.playlist_detail(i)
+#    for song_detail in song_list_detail:
+#        need_add_track_logs.append(song_detail['id'])
+#    print need_add_track_logs
+#
+#    for song_id in need_add_track_logs:
+#        song_info = joker.song_info(song_id)
+#        # print song_info
+#        try:
+#            play_time = song_info[0]['bMusic']['playTime']/1000
+#        except IndexError:
+#            play_time = 60
+#        # print play_time/1000
+#        # print current_song_list
+#
+#        print 'finish', song_id, joker.track_log(song_id, play_time, i)
+#        time.sleep(3)
 
 # print joker.track_log(410519492)
 
@@ -79,27 +92,25 @@ for i in wait_song_list:
 # 扫album，然后添加到songlist中
 # flag = 0
 # w = 0
-# pid = wait_song_list[w]
-# 
-# for i in range(9000000, 9999999):
+# for i in range(229251, 9999999):
 #     print "current %s" % i
 #     need_add_tracks = []
 #     song_list_detail = joker.album(i)
 #     for song_detail in song_list_detail:
 #         need_add_tracks.append(song_detail['id'])
 #     print need_add_tracks
-# 
+#
+#     pid = wait_song_list[w]
+#
 #     result = joker.track_playlist_add(pid, need_add_tracks)
 #     print result
 #     if result['code'] == 505:
 #         print "this song list is full."
-#         wait_song_list.append(joker.create_new_songlist('backup')['id'])
 #         w += 1
-#         pid = wait_song_list[w]
 #         joker.track_playlist_add(pid, need_add_tracks)
-# 
+#
 #     time.sleep(0.5)
 #     flag += 1
 #     if flag > 300:
-#         time.sleep(1)
+#         time.sleep(5)
 #         flag = 0

@@ -15,7 +15,6 @@ from cookielib import LWPCookieJar
 from bs4 import BeautifulSoup
 import time
 import hashlib
-import random
 import base64
 from storage import Storage
 
@@ -108,13 +107,13 @@ class NetEase:
     def __init__(self):
         self.header = {
             'Accept': '*/*',
-            'Accept-Encoding': 'gzip,deflate,sdch',
-            'Accept-Language': 'zh-CN,zh;q=0.8,gl;q=0.6,zh-TW;q=0.4',
+            'Accept-Encoding': 'gzip, deflate',
+            'Accept-Language': 'en-US,en;q=0.5',
             'Connection': 'keep-alive',
             'Content-Type': 'application/x-www-form-urlencoded',
             'Host': 'music.163.com',
             'Referer': 'http://music.163.com/',
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.152 Safari/537.36'
+            'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:52.0) Gecko/20100101 Firefox/52.0'
         }
         self.cookies = {
             'appver': '1.5.2'
@@ -187,9 +186,11 @@ class NetEase:
         text = {
             'username': username,
             'password': password,
-            'rememberLogin': 'true'
+            'rememberLogin': 'true',
+            'clientToken': '1_oJ6HuD4ocd0IUxasZ3NKTJX0JcMIUVll_b8yTQh0RDSp0A1BGwv9IJpwM71cBv/Iv'
         }
         data = encrypted_request(text)
+        print data
         try:
             return self.httpRequest('Login_POST', action, data)
         except:
@@ -343,7 +344,7 @@ class NetEase:
         except:
             return False
 
-    def initProfile(self, nickname, dragPwd):
+    def initProfile(self, nickname, captchaId, captcha):
         try:
             action = 'http://music.163.com/weapi/activate/initProfile?csrf_token='
             self.session.cookies.load()
@@ -355,9 +356,9 @@ class NetEase:
                 return False
             action += csrf
             req = {
-                "dragPwd": dragPwd,
                 "nickname": nickname,
-                "csrf": csrf
+                "captchaId": captchaId,
+                "captcha": captcha,
             }
             page = self.session.post(action, data=encrypted_request(req), headers=self.header, timeout=default_timeout)
             print(page.text)
@@ -399,10 +400,37 @@ class NetEase:
         except:
             return False
 
+    # 点赞
+    #def like(self, eid, origin, threadId):
+    #    try:
+    #        action = 'http://music.163.com/api/v1/comment/like/?csrf_token='
+    #        self.session.cookies.load()
+    #        csrf = ""
+    #        for cookie in self.session.cookies:
+    #            if cookie.name == "__csrf":
+    #                csrf = cookie.value
+    #        if csrf == "":
+    #            return False
+    #        action += csrf
+    #        req = {
+    #            "eid": eid,
+    #            "origin": origin,
+    #            "threadId": threadId,
+    #            "csrf_token": csrf
+    #        }
+    #        page = self.session.post(action, data=encrypted_request(req), headers=self.header, timeout=default_timeout)
+    #        print(page.text)
+    #        results = json.loads(page.text)
+    #        if results["code"] == 200:
+    #            return True
+    #        elif results["code"] == 501:
+    #            return "已经点过赞了"
+    #    except:
+    #        return False
 
-    def like(self, eid, origin, threadId):
+    def like(self, commentId, threadId):
         try:
-            action = 'http://music.163.com/api/v1/comment/like/?csrf_token='
+            action = 'http://music.163.com/weapi/v1/comment/like/?csrf_token='
             self.session.cookies.load()
             csrf = ""
             for cookie in self.session.cookies:
@@ -412,9 +440,9 @@ class NetEase:
                 return False
             action += csrf
             req = {
-                "eid": eid,
-                "origin": origin,
+                "commentId": commentId,
                 "threadId": threadId,
+                "like": "true",
                 "csrf_token": csrf
             }
             page = self.session.post(action, data=encrypted_request(req), headers=self.header, timeout=default_timeout)
@@ -423,9 +451,10 @@ class NetEase:
             if results["code"] == 200:
                 return True
             elif results["code"] == 501:
-                return "已经收藏过了"
+                return "已经点过赞了"
         except:
             return False
+
 
     # 私人FM
     def personal_fm(self):
@@ -603,6 +632,7 @@ class NetEase:
             }
             page = self.session.post(action, data=encrypted_request(req), headers=self.header, timeout=default_timeout)
             results = json.loads(page.text)
+            print results
             if results["code"] == 200:
                 return results
         except:
@@ -785,7 +815,9 @@ class NetEase:
             results['code'] = 100
             return results
 
-    def track_log(self, song_id, play_time, songlist_id):
+
+    # 播放音乐
+    def track_log(self, song_id, play_time):
         try:
             action = 'http://music.163.com/weapi/feedback/weblog?csrf_token='
             self.session.cookies.load()
@@ -797,7 +829,7 @@ class NetEase:
                 return False
             action += csrf
             req = {
-                "logs": '[{"action": "play","json":{"type": "song","wifi": 0,"download": 0,"id": %s,"time": %s,"end": "ui","source": "list","sourceId": %s}}]' % (song_id, play_time, songlist_id),
+                "logs": '[{"action": "play","json":{"type": "song","wifi": 0,"download": 0,"id": %s,"time": %s,"end": "ui"}}]' % (song_id, play_time),
                 "csrf_token": csrf
             }
             page = self.session.post(action, data=encrypted_request(req), headers=self.header, timeout=default_timeout)
@@ -805,7 +837,8 @@ class NetEase:
             return results
         except:
             return {}
-            
+
+
     def create_new_songlist(self, name):
         try:
             action = 'http://music.163.com/weapi/playlist/create?csrf_token='
@@ -826,8 +859,8 @@ class NetEase:
             return results
         except:
             return {}
-            
-    
+
+
     def send_song_list_mail(self, songlist_id, msg, userIds):
         try:
             action = 'http://music.163.com/weapi/msg/private/send?csrf_token='

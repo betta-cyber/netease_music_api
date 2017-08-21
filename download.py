@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
- 
+
 import threading
 import urllib2
-import sys
 import datetime
- 
+
 max_thread = 10
 # 初始化锁
 lock = threading.RLock()
- 
+
 class Downloader(threading.Thread):
     def __init__(self, url, start_size, end_size, fobj, buffer):
         self.url = url
@@ -17,12 +16,12 @@ class Downloader(threading.Thread):
         self.end_size = end_size
         self.fobj = fobj
         threading.Thread.__init__(self)
- 
+
     def run(self):
         # with lock:
         #     # print 'starting: %s' % self.getName()
         self._download()
- 
+
     def _download(self):
         req = urllib2.Request(self.url)
         # 添加HTTP Header(RANGE)设置下载数据的范围
@@ -46,11 +45,11 @@ class Downloader(threading.Thread):
                 # 写入获取到的数据
                 self.fobj.write(block)
                 offset = offset + len(block)
- 
- 
+
+
 def main_download(url, thread=3, save_file='', buffer=1024):
-    start = datetime.datetime.now().replace(microsecond=0)  
-    
+    start = datetime.datetime.now().replace(microsecond=0)
+
     # 最大线程数量不能超过max_thread
     thread = thread if thread <= max_thread else max_thread
     # 获取文件的大小
@@ -69,19 +68,19 @@ def main_download(url, thread=3, save_file='', buffer=1024):
             end_size = end_size + pad_size + 1
         t = Downloader(url, start_size, end_size, fobj, buffer)
         plist.append(t)
- 
+
     #  开始download
     for t in plist:
         t.start()
- 
+
     # 等待所有线程结束
     for t in plist:
         t.join()
- 
+
     # 结束当然记得关闭文件对象
     fobj.close()
     print 'Download completed!'
-    
+
     end = datetime.datetime.now().replace(microsecond=0)
     print("用时: ")
     print(end-start)

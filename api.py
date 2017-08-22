@@ -187,7 +187,7 @@ class NetEase:
             'username': username,
             'password': password,
             'rememberLogin': 'true',
-            'clientToken': '1_oJ6HuD4ocd0IUxasZ3NKTJX0JcMIUVll_b8yTQh0RDSp0A1BGwv9IJpwM71cBv/Iv'
+            'clientToken': '1_UIvTV/GYlQkEQ9nEiIVCqYigB0UpqumE_9WeNCOff5xGsLzdEDKxH2YjR1RLy2fmv'
         }
         data = encrypted_request(text)
         print data

@@ -7,8 +7,11 @@ netease music api
 '''
 
 from api import NetEase
-from download import main_download
 import time
+import gevent
+from gevent.threadpool import ThreadPool
+
+pool = ThreadPool(10)
 
 # 考虑到歌单最多10000首歌，故采用多个歌单
 wait_song_list = [644264533, 644752348, 644765343, 644738922, 644776005, 644749639, 644756477, 644818427, 644835023, 644810557,
@@ -18,27 +21,37 @@ back_song_list = [583517654, 431743699]
 
 joker = NetEase()
 user_info = {}
-local_account = 'lightstrawberry@163.com'
-local_password = '3ca73b783f9735a749bb0192face29f3'
-#login_info = joker.login(local_account, local_password)
-#print login_info
+#local_account = 'lightstrawberry@163.com'
+#local_password = '3ca73b783f9735a749bb0192face29f3'
+local_account = 'zdg085@163.com'
+local_password = '36ed58c5c14dc2f58eef099585d2a939'
 
+login_info = joker.login(local_account, local_password)
+print login_info
 
-print joker.song_info(186049)
-# print joker.add_playlist(732998840)
-
-for i in range(462686663, 500000000):
+def track_log(i):
     song_info = joker.song_info(i)
     if song_info:
-        print song_info
+        #print song_info
         try:
             play_time = song_info[0]['bMusic']['playTime']/1000
         except IndexError:
             play_time = 60
 
-        print 'finish', i, joker.track_log(462686663, play_time)
-        time.sleep(1)
+        print 'finish %s %s' % (i, joker.track_log(i, play_time))
+        #time.sleep(0.5)
+    else:
+        print 'no song'
 
+
+
+# Start 10 threads
+print joker.add_playlist(732998840)
+for k in range(462942247, 500000000):
+    pool.spawn(track_log, k)
+
+gevent.wait()
+print "finish all"
 
 #for i in reversed(back_song_list):
 #    print "current %s" % i

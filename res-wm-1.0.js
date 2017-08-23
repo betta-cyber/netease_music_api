@@ -3376,8 +3376,6 @@
                           , c = this.Sa;
                         G[this.da] = function(b) {
                             G[c].call(a, b)
-                            watchman.flush()
-                            watchman.getToken()
                         }
                         ;
                         return this.da
@@ -3509,7 +3507,6 @@
                 }
                 ;
                 V[b[119]] = function() {
-                    console.log(this.v)
                     return this.v
                 }
                 ;

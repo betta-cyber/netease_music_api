@@ -46,13 +46,15 @@ def track_log(i):
 
 
 # Start 10 threads
-print joker.add_playlist(732998840)
-for k in range(462942247, 500000000):
-    pool.spawn(track_log, k)
+print joker.sendmail([277526727], '你爱我吗？')
+print joker.send_song_list_mail(622835784, 'sssss' ,[277526727])
 
-gevent.wait()
-print "finish all"
-
+#for k in range(462942247, 500000000):
+#    pool.spawn(track_log, k)
+#
+#gevent.wait()
+#print "finish all"
+#
 #for i in reversed(back_song_list):
 #    print "current %s" % i
 #    need_add_track_logs = []

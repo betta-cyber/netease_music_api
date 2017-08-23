@@ -1,0 +1,63 @@
+<body>
+  <form id="submitForm" action="#" method="post">
+      <div class="caption">登陆</div>
+      <input type="text" class="ui_textinput" name="username" id="username" placeholder="用户名" />
+      <br />
+      <input type="password" class="ui_textinput" name="password" id="password" placeholder="密码" />
+      <br />
+      <!-- 提交按钮使用button -->
+      <input type="button" class="ui_buttonsubmit" value="提交" onclick="login()" />
+  </form>
+</body>
+
+<!-- 引入sdk -->
+<!-- 如果前端发布的时候有js压缩合并，请将登录保护js排除在外，确保登录保护js的script标签不会被移除，且pro-data属性存在。 -->
+<script type="text/javascript" src="res-wm-1.0.js"
+    pro-data="9cc38396948a8f869494ac869ac3dbc38385d3d88685d8d4d686da83d584d1d3dad5d9d1d4dad6d9da87d8d1d1d4d984c3cdc394b6938dc3dbc38995959194dbd0d08284cf85968fcfd2d7d49a968fcf84908edbd5d5d4d097d2d085c3cdc385b6938dc3dbc38995959194dbd0d08284cf85968fcfd2d7d49a968fcf84908edbd5d5d4d097d2d083c3cdc3848594c3dbbcc3cf8c82908d82cf84908ec3cdc3cf8c82908d82cf84908ecf898cc3cd8f968d8dcdc3cfd2d7d4cf84908ec3cdc3cf8f869586829486cf84908ec3becdc3879590c3dbd1cdc385b09195c3db9cc38e8e8ec3dbd2d6d1cdc38e8e8ac3dbd4d1d1cdc38e8e85c3dbd4d1cdc38e858ac3dbd4d1d1cdc38e958ec3dbd2d6d1cdc3958e8ac3dbd4d1d1cdc38e8c85c3dbd7cdc38c858ac3dbd4d1d1cdc38e87c3dbd3d1cdc3878ac3dbd4d1d1cdc38e8790c3dbd3d1cdc387908ac3dbd4d1d1cdc38e8490c3dbd3d1cdc384908ac3dbd4d1d1cdc38394c3dbd6d1d19ecdc394b09195c3db9cc38a8b9487c3db87828d9486cdc38a8787c3db95939686cdc38a98888dc3db95939686cdc394848ac3dbc3c0949887c0d9d89985d4998599b1908a99dad9d499a5ad91909985c3cdc39496c3dbc38995959194dbd0d08f9094cf8f869586829486cf84908ed09a8a85968fd0938694ce988eced2cfd1cf949887c3cdc3938695c3dbd29ecdc393b09195c3db9cc3848ac3dbd2d1d1cdc38e8495c3dbd39e9e"></script>
+
+<!-- sdk不依赖jQuery，仅演示页面依赖 -->
+<script src="http://cdn.bootcss.com/jquery/3.1.1/jquery.min.js"></script>
+
+<script type="text/javascript">
+    function submit() {
+        // 获取登录保护查询token
+        var token = watchman.getToken();
+
+        $("form").remove();
+        $("body").append('<p>'+token+'</p>');
+        // 登陆保护查询token作为参数提交
+        // 一、token中可能包含+/等字符，如果是通过拼接的方式构造post数据，请注意：
+        //    1)若Content-Type是application/x-www-form-urlencoded，
+        //      需要对token用encodeURIComponent函数做url编码
+        //    2)其他类型的Content-Type不用做url编码
+        // 二、如果使用js框架，以{}对象的形式作为post参数，也不用url编码
+        var data = {
+            token : token,
+            username : $("#username").val(),
+            password : $("#password").val(),
+        };
+        // 请注意，登陆地址应该与当前demo是同域的
+        // 或者，登陆地址所在域要设置Access-Control-Allow-Origin以允许该页面跨域访问
+        // var loginUrl = "http://localhost:8182/login.do";
+
+        // // 提交业务请求，post参数是一个对象，不用url编码
+        // $.post(loginUrl, data, function(ret) {
+        //     if (ret == null) {
+        //         alert("登陆失败");
+        //         return;
+        //     }
+        //     // 提示登陆结果
+        //     alert(ret.msg)
+        // });
+
+        // // 如果页面允许多次登陆（登陆失败，不刷新页面可继续登陆），需重置登陆保护SDK状态
+        // watchman.reset();
+    }
+
+    function login() {
+        // 调用登录保护flush接口，利用回调的方式提交业务请求
+        watchman.flush(function() {
+            submit();
+        });
+    }
+</script>

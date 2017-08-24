@@ -21,10 +21,10 @@ back_song_list = [583517654, 431743699]
 
 joker = NetEase()
 user_info = {}
-#local_account = 'lightstrawberry@163.com'
-#local_password = '3ca73b783f9735a749bb0192face29f3'
-local_account = 'oxp202@163.com'
-local_password = '36ed58c5c14dc2f58eef099585d2a939'
+local_account = 'lightstrawberry@163.com'
+local_password = '3ca73b783f9735a749bb0192face29f3'
+#local_account = 'oxp202@163.com'
+#local_password = '36ed58c5c14dc2f58eef099585d2a939'
 
 login_info = joker.login(local_account, local_password)
 print login_info

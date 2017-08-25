@@ -14,7 +14,7 @@ local_account = 'at7400@163.com'
 local_password = '5kz231'
 
 def get_token():
-    driver = webdriver.Chrome("/usr/lib/chromium-browser/chromedriver")
+    driver = webdriver.Chrome("./chromedriver")
     #driver = webdriver.Chrome(executable_path='/usr/bin/chromium-browser')
     driver.get('http://music.163.com/')
 
@@ -35,7 +35,7 @@ def get_token():
     login = driver.find_element_by_xpath('//div[@class="f-mgt20"]/a')
     login.click()
 
-    time.sleep(2)
+    time.sleep(3)
     name = driver.find_elements_by_css_selector("input[type='text']")[1]
     name.send_keys("asdasfasglkafsnas")
 
@@ -50,10 +50,43 @@ def get_token():
     f.write(data)
     f.close()
 
+    check_loc = ''
+    for each in os.walk('Pathed'):
+        for afile in each[2]:
+            similarrate = calc_similar_by_path('Pathed/'+afile, path)
+            print similarrate
+            if similarrate > 0.6:
+                print(afile)
+                check_loc = 'Pathed/'+afile
+                break
+    if check_loc == '':
+        time.sleep(100)
+        #driver.close()
+        exit()
+    img = ImageChops.difference(Image.open(path), Image.open(check_loc))
+    pix = img.load()
+    bk = 0
+    print img.size[0], img.size[1]
+    for x in range(img.size[0]):
+        for y in range(img.size[1]):
+            r, g, b = pix[x, y]
+            if r>50 and g>50 and b>50:
+                print(pix[x,y])
+                draw = ImageDraw.Draw(img)
+                draw.line(((x,0), (x,img.size[1]-1)), fill=255)
+                print(x,y)
+                img.save("final.jpg")
+                bk = 1
+                locatex = x
+                print locatex
+                break
+        if bk == 1:
+            break
+
     ActionChains(driver).click_and_hold(on_element=slider).perform()
 
     #totalmove = int((334.0 / 389.0) * locatex) + 18
-    totalmove = 100
+    totalmove = localex + 5
     print(totalmove)
     now = 0
     while now < totalmove - 40:
@@ -76,9 +109,9 @@ def get_token():
 
     driver.implicitly_wait(2)
 
-    #driver.quit()
+    driver.quit()
 
-    #return driver.find_element_by_xpath('/html/body/p').text
+    return driver.find_element_by_xpath('/html/body/p').text
 
 def make_regalur_image(img, size = (256, 256)):
     return img.resize(size).convert('RGB')
@@ -100,6 +133,7 @@ def calc_similar(li, ri):
 
 def calc_similar_by_path(lf, rf):
     li, ri = make_regalur_image(Image.open(lf)), make_regalur_image(Image.open(rf))
+    print li, ri
     return calc_similar(li, ri)
 
 

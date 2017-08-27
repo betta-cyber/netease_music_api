@@ -9,11 +9,9 @@ from PIL import ImageChops,ImageDraw
 import urllib2
 import random
 import os
+from coolname import generate_slug
 
-local_account = 'at7400@163.com'
-local_password = '5kz231'
-
-def get_token():
+def get_token(local_account, local_password):
     driver = webdriver.Chrome("./chromedriver")
     #driver = webdriver.Chrome(executable_path='/usr/bin/chromium-browser')
     driver.get('http://music.163.com/')
@@ -34,35 +32,45 @@ def get_token():
 
     login = driver.find_element_by_xpath('//div[@class="f-mgt20"]/a')
     login.click()
+    time.sleep(3)
+
+    try:
+        driver.find_element_by_xpath('//div[@class="slideFg"]')
+        track_captcha(driver)
+        login.click()
+    except:
+        print "no captcha"
 
     time.sleep(3)
-    name = driver.find_elements_by_css_selector("input[type='text']")[1]
-    name.send_keys("asdasfasglkafsnas")
+
+    try:
+        name = driver.find_elements_by_css_selector("input[type='text']")[1]
+    except IndexError:
+        driver.quit()
+    random_name = generate_slug(2)
+    name.send_keys(random_name)
 
     time.sleep(2)
 
-    picurl = driver.find_element_by_xpath('//div[@class="puzzleBg"]/img').get_attribute('src')
-    slider = driver.find_element_by_xpath('//div[@class="slideFg"]')
-    req = urllib2.Request(picurl)
-    data = urllib2.urlopen(req, timeout=30).read()
-    path = '1.JPG'
-    f = open(path, 'wb')
-    f.write(data)
-    f.close()
+    track_captcha(driver)
 
+    file = open('163.md', 'a')
+    file.write('%s,%s' % (local_account, local_password))
+    file.close()
+
+    time.sleep(100)
+    driver.implicitly_wait(2)
+    driver.quit()
+
+
+def track_captcha(driver):
+    path = '1.JPG'
     check_loc = ''
-    for each in os.walk('Pathed'):
-        for afile in each[2]:
-            similarrate = calc_similar_by_path('Pathed/'+afile, path)
-            print similarrate
-            if similarrate > 0.6:
-                print(afile)
-                check_loc = 'Pathed/'+afile
-                break
-    if check_loc == '':
-        time.sleep(100)
-        #driver.close()
-        exit()
+    slider = driver.find_element_by_xpath('//div[@class="slideFg"]')
+
+    while check_loc == '':
+        check_loc = get_img(driver, path, slider)
+
     img = ImageChops.difference(Image.open(path), Image.open(check_loc))
     pix = img.load()
     bk = 0
@@ -83,35 +91,68 @@ def get_token():
         if bk == 1:
             break
 
+    # 滑动
+    track_slide(driver, locatex, slider)
+
+
+def get_img(driver, path, slider):
+    picurl = driver.find_element_by_xpath('//div[@class="puzzleBg"]/img').get_attribute('src')
+    req = urllib2.Request(picurl)
+    data = urllib2.urlopen(req, timeout=30).read()
+    f = open(path, 'wb')
+    f.write(data)
+    f.close()
+
+    check_loc = ''
+    for each in os.walk('Pathed'):
+        for afile in each[2]:
+            similarrate = calc_similar_by_path('Pathed/'+afile, path)
+            if similarrate > 0.65:
+                print(afile)
+                check_loc = 'Pathed/'+afile
+                return check_loc
+                break
+    if check_loc == '':
+        track_slide(driver, 100, slider)
+        return ''
+
+
+def track_slide(driver, locatex, slider):
     ActionChains(driver).click_and_hold(on_element=slider).perform()
 
-    #totalmove = int((334.0 / 389.0) * locatex) + 18
-    totalmove = localex + 5
-    print(totalmove)
+    totalmove = (int((220.0 / 320.0) * locatex) - 7.5)
+
+    #truemove = int((220.0 / 320.0) * locatex) - 7.5
+
     now = 0
     while now < totalmove - 40:
         nmove = int(random.random()*20)
         if now+nmove>totalmove - 40:
             nmove = totalmove - now - 40
-        ActionChains(driver).move_by_offset(nmove,0).perform()
-        time.sleep(int(random.random()*10)/100)
+        hmove = int(random.uniform(-1, 1)*10)
+        ActionChains(driver).move_by_offset(nmove,hmove).perform()
+        time.sleep(int(random.random()*10)/1000)
         now+=nmove
     while now < totalmove:
         nmove = int(random.random()*3)
         if now+nmove>totalmove:
             nmove = totalmove - now
-        ActionChains(driver).move_by_offset(nmove,0).perform()
-        time.sleep(int(random.random()*10)/100)
+        hmove = int(random.uniform(-1, 1)*10)
+        ActionChains(driver).move_by_offset(nmove,hmove).perform()
+        time.sleep(int(random.random()*10)/50)
         now+=nmove
+
+    #while now < truemove:
+    #    nmove = int(random.random()*3)
+    #    if now+nmove>truemove:
+    #        nmove = truemove - now
+    #    ActionChains(driver).move_by_offset(nmove,0).perform()
+    #    time.sleep(int(random.random()*10)/100)
+    #    now+=nmove
+
+    time.sleep(0.5)
     ActionChains(driver).release(on_element=slider).perform()
 
-    time.sleep(100)
-
-    driver.implicitly_wait(2)
-
-    driver.quit()
-
-    return driver.find_element_by_xpath('/html/body/p').text
 
 def make_regalur_image(img, size = (256, 256)):
     return img.resize(size).convert('RGB')
@@ -138,4 +179,8 @@ def calc_similar_by_path(lf, rf):
 
 
 if __name__ == "__main__":
-    get_token()
+    for line in open('account.txt'):
+        a = line.split(',')
+        print a[0], a[1]
+        get_token(a[0], a[1])
+        time.sleep(10)

@@ -2,6 +2,7 @@
 # encoding: utf-8
 
 from selenium import webdriver
+#from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.common.action_chains import ActionChains
 import time
 from PIL import Image
@@ -10,10 +11,21 @@ import urllib2
 import random
 import os
 from coolname import generate_slug
+from mmap import mmap
 
 def get_token(local_account, local_password):
-    driver = webdriver.Chrome("./chromedriver")
-    #driver = webdriver.Chrome(executable_path='/usr/bin/chromium-browser')
+
+    PROXY = "60.161.244.28:53281" # IP:PORT or HOST:PORT
+    chrome_options = webdriver.ChromeOptions()
+    chrome_options.add_argument('--proxy-server=%s' % PROXY)
+
+    driver = webdriver.Chrome(chrome_options=chrome_options, executable_path='/usr/lib/chromium-browser/chromedriver')
+
+    #driver = webdriver.Chrome(executable_path='/usr/lib/chromium-browser/chromedriver')
+    #firefox_capabilities = DesiredCapabilities.FIREFOX
+    #firefox_capabilities['marionette'] = True
+    #firefox_capabilities['binary'] = 'geckodriver'
+    #driver = webdriver.Firefox(capabilities=firefox_capabilities)
     driver.get('http://music.163.com/')
 
     time.sleep(1)
@@ -32,23 +44,26 @@ def get_token(local_account, local_password):
 
     login = driver.find_element_by_xpath('//div[@class="f-mgt20"]/a')
     login.click()
-    time.sleep(3)
+    time.sleep(5)
 
+    # 登录时候会出现滑动验证
     try:
         driver.find_element_by_xpath('//div[@class="slideFg"]')
-        track_captcha(driver)
-        login.click()
+        repassword = driver.find_elements_by_css_selector("input[type='password']")[0]
+        if repassword:
+            track_captcha(driver)
+            login.click()
     except:
         print "no captcha"
 
-    time.sleep(3)
-
+    time.sleep(1)
     try:
         name = driver.find_elements_by_css_selector("input[type='text']")[1]
+        random_name = generate_slug(2)
+        name.send_keys(random_name)
     except IndexError:
         driver.quit()
-    random_name = generate_slug(2)
-    name.send_keys(random_name)
+        return 0
 
     time.sleep(2)
 
@@ -58,7 +73,7 @@ def get_token(local_account, local_password):
     file.write('%s,%s' % (local_account, local_password))
     file.close()
 
-    time.sleep(100)
+    time.sleep(2)
     driver.implicitly_wait(2)
     driver.quit()
 
@@ -122,8 +137,6 @@ def track_slide(driver, locatex, slider):
 
     totalmove = (int((220.0 / 320.0) * locatex) - 7.5)
 
-    #truemove = int((220.0 / 320.0) * locatex) - 7.5
-
     now = 0
     while now < totalmove - 40:
         nmove = int(random.random()*20)
@@ -141,14 +154,6 @@ def track_slide(driver, locatex, slider):
         ActionChains(driver).move_by_offset(nmove,hmove).perform()
         time.sleep(int(random.random()*10)/50)
         now+=nmove
-
-    #while now < truemove:
-    #    nmove = int(random.random()*3)
-    #    if now+nmove>truemove:
-    #        nmove = truemove - now
-    #    ActionChains(driver).move_by_offset(nmove,0).perform()
-    #    time.sleep(int(random.random()*10)/100)
-    #    now+=nmove
 
     time.sleep(0.5)
     ActionChains(driver).release(on_element=slider).perform()
@@ -177,10 +182,24 @@ def calc_similar_by_path(lf, rf):
     print li, ri
     return calc_similar(li, ri)
 
+def removeLine(filename, lineno):
+    f=os.open(filename, os.O_RDWR)
+    m=mmap(f,0)
+    p=0
+    for i in range(lineno-1):
+        p=m.find('\n',p)+1
+    q=m.find('\n',p)
+    m[p:q] = ' '*(q-p)
+    os.close(f)
+
 
 if __name__ == "__main__":
+    lineno = 0
     for line in open('account.txt'):
-        a = line.split(',')
-        print a[0], a[1]
-        get_token(a[0], a[1])
-        time.sleep(10)
+        lineno += 1
+        if line:
+            a = line.split(',')
+            print a[0], a[1]
+            get_token(a[0], a[1])
+            removeLine('account.txt', lineno)
+            time.sleep(10)

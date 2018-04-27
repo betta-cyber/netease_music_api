@@ -24,10 +24,11 @@ local_password = 'c7236970bfc8e9f7aa83ad3d6d14d59a'
 def save2sql(conn, data):
     try:
         sql = (
-            "INSERT INTO netease_music_albums (name, artist_id, album_id, comment_thread_id, description, pic_url, type, size, publish_time) "
+            "INSERT INTO netease_music_songs (name, artist_id, album_id, song_id, comment_thread_id, description, pic_url, mv_id, pop) "
             "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
         )
-        sql_data = (data['name'], data['artist']['id'], data['id'], data['commentThreadId'], data['description'], data['picUrl'], data['type'], data['size'], data['publishTime'])
+        sql_data = (data['name'], data['ar'][0]['id'], data['al']['id'], data['id'], "", "", "", data['mv'], data['pop'])
+        print sql_data
         cur.execute(sql, sql_data)
         conn.commit()
     except:
@@ -40,18 +41,21 @@ conn = MySQLdb.Connect(host = '127.0.0.1',
                        charset = 'utf8')
 
 cur = conn.cursor()
-sql = "SELECT artist_id from netease_music_artists"
+sql = "SELECT album_id from netease_music_albums"
 cur.execute(sql)
 result=cur.fetchall()
 
+#print json.dumps(joker.album(34898697))
+
 for i in result:
-    print "artist_id %s" % (i)
-    artist_id = i[0]
-    album_detail = joker.artist_album(artist_id)
-    if album_detail:
-        albums = album_detail['hotAlbums']
-        for a in albums:
-            save2sql(conn, a)
+    print "album_id %s" % (i)
+    id = i[0]
+    detail = joker.album(id)
+    if detail:
+        songs = detail['songs']
+        for s in songs:
+            save2sql(conn, s)
     sleep(0.5)
+
 
 conn.close()

@@ -622,15 +622,27 @@ class NetEase:
         except:
             return []
 
-
-    # album id --> song id set
     def album(self, album_id):
-        action = 'http://music.163.com/api/album/' + str(album_id)
         try:
-            data = self.httpRequest('GET', action)
-            return data['album']['songs']
+            action = 'http://music.163.com/weapi/v1/album/%s?csrf_token=' % (album_id)
+            self.session.cookies.load()
+            csrf = ""
+            for cookie in self.session.cookies:
+                if cookie.name == "__csrf":
+                    csrf = cookie.value
+            if csrf == "":
+                return False
+            action += csrf
+            req = {
+                "csrf_token": csrf
+            }
+            page = self.session.post(action, data=encrypted_request(req), headers=self.header, timeout=default_timeout)
+            results = json.loads(page.text)
+            if results["code"] == 200:
+                return results
         except:
             return []
+
 
     # song ids --> song urls ( details )
     def songs_detail(self, ids, offset=0):

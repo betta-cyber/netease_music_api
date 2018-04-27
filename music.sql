@@ -28,3 +28,19 @@ CREATE TABLE `netease_music_albums` (
   `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `netease_music_songs` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(64) DEFAULT NULL,
+  `artist_id` int(11) NOT NULL,
+  `album_id` int(11) NOT NULL,
+  `song_id` int(11) NOT NULL UNIQUE,
+  `comment_thread_id` varchar(64) DEFAULT NULL,
+  `description` varchar(1024) NOT NULL,
+  `pic_url` varchar(128) DEFAULT NULL,
+  `mv_id` int(11) DEFAULT NULL,
+  `pop` int(11) DEFAULT NULL,
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;

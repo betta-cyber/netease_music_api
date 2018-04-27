@@ -21,8 +21,8 @@ back_song_list = [583517654, 431743699]
 
 joker = NetEase()
 user_info = {}
-local_account = 'lightstrawberry@163.com'
-local_password = '3ca73b783f9735a749bb0192face29f3'
+local_account = 'betta551@163.com'
+local_password = 'c7236970bfc8e9f7aa83ad3d6d14d59a'
 #local_account = 'oxp202@163.com'
 #local_password = '36ed58c5c14dc2f58eef099585d2a939'
 
@@ -31,26 +31,26 @@ print login_info
 
 def track_log(i):
     song_info = joker.song_info(i)
+    print song_info
     if song_info:
         #print song_info
         try:
             play_time = song_info[0]['bMusic']['playTime']/1000
         except IndexError:
             play_time = 60
-
         print 'finish %s %s' % (i, joker.track_log(i, play_time))
         #time.sleep(0.5)
     else:
-        print 'no song'
+        print 'no song %s' % (i)
 
 
 
 # Start 10 threads
-print joker.sendmail([277526727], '你爱我吗？')
-print joker.send_song_list_mail(622835784, 'sssss' ,[277526727])
+#print joker.sendmail([277526727], '你爱我吗？')
+#print joker.send_song_list_mail(622835784, 'sssss' ,[277526727])
 
-#for k in range(462942247, 500000000):
-#    pool.spawn(track_log, k)
+for k in range(523942247, 600000000):
+    pool.spawn(track_log, k)
 #
 #gevent.wait()
 #print "finish all"

@@ -575,13 +575,29 @@ class NetEase:
             return []
 
     # 歌手单曲
-    def artists(self, artist_id):
-        action = 'http://music.163.com/api/artist/' + str(artist_id)
+    def artist(self, artist_id):
+        action = 'http://music.163.com/weapi/artist/introduction?csrf_token='
         try:
-            data = self.httpRequest('GET', action)
-            return data['hotSongs']
+            action = 'http://music.163.com/weapi/v1/artist/%s?csrf_token=' % (artist_id)
+            self.session.cookies.load()
+            csrf = ""
+            for cookie in self.session.cookies:
+                if cookie.name == "__csrf":
+                    csrf = cookie.value
+            if csrf == "":
+                return False
+            action += csrf
+            req = {
+                "id": artist_id,
+                "csrf_token": csrf
+            }
+            page = self.session.post(action, data=encrypted_request(req), headers=self.header, timeout=default_timeout)
+            results = json.loads(page.text)
+            if results["code"] == 200:
+                return results
         except:
             return []
+
 
     # album id --> song id set
     def album(self, album_id):
@@ -611,8 +627,10 @@ class NetEase:
     # song id --> song url ( details )
     def song_info(self, music_id):
         action = "http://music.163.com/api/song/detail/?id=" + str(music_id) + "&ids=[" + str(music_id) + "]"
+        print action
         try:
             data = self.httpRequest('GET', action)
+            print data
             return data['songs']
         except:
             return []

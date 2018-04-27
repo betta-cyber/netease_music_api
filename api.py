@@ -574,9 +574,9 @@ class NetEase:
         except:
             return []
 
-    # 歌手单曲
+    # 歌手信息
     def artist(self, artist_id):
-        action = 'http://music.163.com/weapi/artist/introduction?csrf_token='
+        # action = 'http://music.163.com/weapi/artist/introduction?csrf_token='
         try:
             action = 'http://music.163.com/weapi/v1/artist/%s?csrf_token=' % (artist_id)
             self.session.cookies.load()
@@ -589,6 +589,30 @@ class NetEase:
             action += csrf
             req = {
                 "id": artist_id,
+                "csrf_token": csrf
+            }
+            page = self.session.post(action, data=encrypted_request(req), headers=self.header, timeout=default_timeout)
+            results = json.loads(page.text)
+            if results["code"] == 200:
+                return results
+        except:
+            return []
+
+    def artist_album(self, artist_id):
+        try:
+            action = 'http://music.163.com/weapi/artist/albums/%s?csrf_token=' % (artist_id)
+            self.session.cookies.load()
+            csrf = ""
+            for cookie in self.session.cookies:
+                if cookie.name == "__csrf":
+                    csrf = cookie.value
+            if csrf == "":
+                return False
+            action += csrf
+            req = {
+                "offset": 0,
+                "total": True,
+                "limit": 300,
                 "csrf_token": csrf
             }
             page = self.session.post(action, data=encrypted_request(req), headers=self.header, timeout=default_timeout)

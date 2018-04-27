@@ -49,7 +49,7 @@ def track_log(i):
 #print joker.sendmail([277526727], '你爱我吗？')
 #print joker.send_song_list_mail(622835784, 'sssss' ,[277526727])
 
-for k in range(523942247, 600000000):
+for k in range(523952247, 600000000):
     pool.spawn(track_log, k)
 #
 #gevent.wait()

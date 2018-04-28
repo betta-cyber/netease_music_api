@@ -612,13 +612,12 @@ class NetEase:
             req = {
                 "offset": 0,
                 "total": True,
-                "limit": 300,
+                "limit": 100,
                 "csrf_token": csrf
             }
             page = self.session.post(action, data=encrypted_request(req), headers=self.header, timeout=default_timeout)
             results = json.loads(page.text)
-            if results["code"] == 200:
-                return results
+            return results
         except:
             return []
 

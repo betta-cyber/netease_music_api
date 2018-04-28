@@ -40,7 +40,7 @@ conn = MySQLdb.Connect(host = '127.0.0.1',
                        charset = 'utf8')
 
 cur = conn.cursor()
-sql = "SELECT artist_id from netease_music_artists"
+sql = "SELECT artist_id from netease_music_artists where artist_id > 18437"
 cur.execute(sql)
 result=cur.fetchall()
 
@@ -48,10 +48,12 @@ for i in result:
     print "artist_id %s" % (i)
     artist_id = i[0]
     album_detail = joker.artist_album(artist_id)
-    if album_detail:
+    if album_detail['code'] == 200:
         albums = album_detail['hotAlbums']
         for a in albums:
             save2sql(conn, a)
-    sleep(0.5)
+    else:
+        print album_detail['msg']
+    sleep(1)
 
 conn.close()

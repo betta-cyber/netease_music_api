@@ -617,7 +617,8 @@ class NetEase:
             }
             page = self.session.post(action, data=encrypted_request(req), headers=self.header, timeout=default_timeout)
             results = json.loads(page.text)
-            return results
+            if results["code"] == 200:
+                return results
         except:
             return []
 

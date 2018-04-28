@@ -31,8 +31,9 @@ def save2sql(conn, data):
         print sql_data
         cur.execute(sql, sql_data)
         conn.commit()
-    except:
-        print 'error'
+    except Exception, e:
+        print Exception, ":", e
+
 
 conn = MySQLdb.Connect(host = '127.0.0.1',
                        user = 'root',
@@ -41,7 +42,7 @@ conn = MySQLdb.Connect(host = '127.0.0.1',
                        charset = 'utf8')
 
 cur = conn.cursor()
-sql = "SELECT album_id from netease_music_albums where album_id > 38509078"
+sql = "SELECT album_id from netease_music_albums where id > 76372"
 cur.execute(sql)
 result=cur.fetchall()
 

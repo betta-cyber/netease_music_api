@@ -11,6 +11,8 @@ import json
 import _mysql
 import MySQLdb
 from time import sleep
+import datetime
+import time
 
 
 joker = NetEase()
@@ -27,11 +29,15 @@ def save2sql(conn, data):
             "INSERT INTO netease_music_albums (name, artist_id, album_id, comment_thread_id, description, pic_url, type, size, publish_time) "
             "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
         )
-        sql_data = (data['name'], data['artist']['id'], data['id'], data['commentThreadId'], data['description'], data['picUrl'], data['type'], data['size'], data['publishTime'])
+        time_tmp = time.localtime(data['publishTime']/1000)
+        publish_time = time.strftime("%Y-%m-%d %H:%M:%S", time_tmp)
+        sql_data = (data['name'], data['artist']['id'], data['id'], data['commentThreadId'], data['description'], data['picUrl'], data['type'], data['size'], publish_time)
+        print sql_data
         cur.execute(sql, sql_data)
         conn.commit()
-    except:
-        print 'error'
+    except Exception, e:
+        print Exception, ":", e
+
 
 conn = MySQLdb.Connect(host = '127.0.0.1',
                        user = 'root',
@@ -40,7 +46,7 @@ conn = MySQLdb.Connect(host = '127.0.0.1',
                        charset = 'utf8')
 
 cur = conn.cursor()
-sql = "SELECT artist_id from netease_music_artists where artist_id > 18437"
+sql = "SELECT artist_id from netease_music_artists where artist_id > 20452"
 cur.execute(sql)
 result=cur.fetchall()
 
@@ -48,12 +54,12 @@ for i in result:
     print "artist_id %s" % (i)
     artist_id = i[0]
     album_detail = joker.artist_album(artist_id)
-    if album_detail['code'] == 200:
+    if album_detail:
         albums = album_detail['hotAlbums']
         for a in albums:
             save2sql(conn, a)
     else:
-        print album_detail['msg']
+        print "no album detail"
     sleep(1)
 
 conn.close()

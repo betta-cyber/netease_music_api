@@ -42,7 +42,7 @@ conn = MySQLdb.Connect(host = '127.0.0.1',
                        passwd = 'root',
                        db = 'netease',
                        charset = 'utf8')
-for i in range(18437, 962804):
+for i in range(36623, 962804):
     print str(i)+'\n'
     artists_info = joker.artist(i)
     #print artists_info

@@ -42,7 +42,7 @@ conn = MySQLdb.Connect(host = '127.0.0.1',
                        charset = 'utf8')
 
 cur = conn.cursor()
-sql = "SELECT album_id from netease_music_albums where id > 76372"
+sql = "SELECT album_id from netease_music_albums where id > (select max(id) from netease_music_albums where album_id = (select album_id from netease_music_songs order by id desc limit 1))"
 cur.execute(sql)
 result=cur.fetchall()
 
@@ -50,8 +50,9 @@ result=cur.fetchall()
 
 for i in result:
     print "album_id %s" % (i)
-    id = i[0]
-    detail = joker.album(id)
+    a_id = i[0]
+    detail = joker.album(a_id)
+    print detail
     if detail:
         songs = detail['songs']
         for s in songs:

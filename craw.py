@@ -34,15 +34,15 @@ def save2sql(conn, data):
         sql_data = (artist['name'], artist['id'], artist['briefDesc'], artist['picUrl'], artist['picId'], artist['mvSize'], artist['albumSize'], artist['musicSize'])
         cur.execute(sql, sql_data)
         conn.commit()
-    except:
-        print 'error'
+    except Exception, e:
+        print Exception, ":", e
 
 conn = MySQLdb.Connect(host = '127.0.0.1',
                        user = 'root',
                        passwd = 'root',
                        db = 'netease',
                        charset = 'utf8')
-for i in range(36623, 962804):
+for i in range(1000000, 10000000):
     print str(i)+'\n'
     artists_info = joker.artist(i)
     #print artists_info

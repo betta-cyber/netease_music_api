@@ -45,7 +45,7 @@ conn = MySQLdb.Connect(host = '127.0.0.1',
 
 cur = conn.cursor()
 #sql = "SELECT song_id from netease_music_songs where id > (select song_id from netease_music_comments order by id desc limit 1)"
-sql = "SELECT song_id from netease_music_songs order by id"
+sql = "SELECT song_id from netease_music_songs where id > 186664 order by id "
 cur.execute(sql)
 result=cur.fetchall()
 
@@ -56,15 +56,16 @@ for s in result:
     page = 0
     while flag:
         detail = joker.comment(id, page)
+        print detail
         if detail:
             flag = detail['more']
             comments = detail['comments']
             for s in comments:
                 save2sql(conn, s, id)
         else:
-            continue
-        page += 1
+            flag = False
         sleep(0.5)
+        page += 1
     sleep(0.5)
 
 

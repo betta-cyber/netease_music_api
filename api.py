@@ -673,6 +673,53 @@ class NetEase:
         except:
             return []
 
+    # user_id -> follows
+    def user_follows(self, user_id, page=0):
+        try:
+            action = 'http://music.163.com/weapi/user/getfollows/%s?csrf_token=' % (user_id)
+            self.session.cookies.load()
+            csrf = ""
+            for cookie in self.session.cookies:
+                if cookie.name == "__csrf":
+                    csrf = cookie.value
+            if csrf == "":
+                return False
+            action += csrf
+            req = {
+                "offset": page*30,
+                "limit": 30,
+                "order": True,
+                "csrf_token": csrf
+            }
+            page = self.session.post(action, data=encrypted_request(req), headers=self.header, timeout=default_timeout)
+            results = json.loads(page.text)
+            if results["code"] == 200:
+                return results
+        except:
+            return []
+
+    # user_id -> follows
+    def user_detail(self, user_id):
+        try:
+            action = 'http://music.163.com/weapi/v1/user/detail/%s?csrf_token=' % (user_id)
+            self.session.cookies.load()
+            csrf = ""
+            for cookie in self.session.cookies:
+                if cookie.name == "__csrf":
+                    csrf = cookie.value
+            if csrf == "":
+                return False
+            action += csrf
+            req = {
+                "csrf_token": csrf
+            }
+            page = self.session.post(action, data=encrypted_request(req), headers=self.header, timeout=default_timeout)
+            results = json.loads(page.text)
+            if results["code"] == 200:
+                return results
+        except:
+            return []
+
 
     # song ids --> song urls ( details )
     def songs_detail(self, ids, offset=0):

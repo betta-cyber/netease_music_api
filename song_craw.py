@@ -42,6 +42,7 @@ conn = MySQLdb.Connect(host = '127.0.0.1',
                        charset = 'utf8')
 
 cur = conn.cursor()
+# album_id 3317904
 sql = "SELECT album_id from netease_music_albums where id > (select max(id) from netease_music_albums where album_id = (select album_id from netease_music_songs order by id desc limit 1))"
 cur.execute(sql)
 result=cur.fetchall()

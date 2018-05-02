@@ -47,6 +47,7 @@ def save2sql(conn, data):
         print Exception, ":", e
 
 def craw(start, limit):
+    print  'sub thread start!the thread name is:%s ' % threading.currentThread().getName()
     conn = MySQLdb.Connect(host = '127.0.0.1',
                         user = 'root',
                         passwd = 'root',
@@ -86,12 +87,18 @@ def craw(start, limit):
 def main():
     start_number = int(sys.argv[1])
     limit_number = int(sys.argv[2])
-    
-    for i in range(10):
-        my_thread = threading.Thread(target=craw,
-            args=(start_number+i*limit_number, limit_number))
-        my_thread.start()
-        my_thread.join()
+
+    thread_list = []    #线程存放列表
+    for i in xrange(10):
+        t =threading.Thread(target=craw,args=(start_number+i*limit_number, limit_number))
+        t.setDaemon(True)
+        thread_list.append(t)
+
+    for t in thread_list:
+        t.start()
+
+    for t in thread_list:
+        t.join()
 
 if __name__ == '__main__':
     main()

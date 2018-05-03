@@ -1,0 +1,37 @@
+<body>
+    <a href="javascript:rise();">赞</a>
+</body>
+
+<!-- 在<body>标签之后嵌入SDK -->
+<script type="text/javascript" src="https://acstatic-dun.126.net/tool.min.js"></script>
+
+<script type="text/javascript">
+    var wm = null;
+    // 初始化SDK，只需初始化一次
+    // auto使用默认值，即自动化模式
+    initWatchman({
+        productNumber: 'YD00000558929251',
+        onload: function (instance) {
+            wm = instance
+        }
+    });
+
+    function submit(token) {
+        var data = {
+            "token": token
+        };
+        console.log(data)
+        $.post("rise.do", data, function(data) {
+            // 处理点赞的响应
+        });
+    }
+
+    // 处理点赞业务
+    function rise() {
+        // 调用登录保护SDK的getToken接口，通过接口回调的方式获取token
+        wm & wm.getToken('0b0cdd23ed1144a0b78de049edc09824', function(token) {
+            // 提交点赞业务请求
+            submit(token);
+        });
+    }
+</script>

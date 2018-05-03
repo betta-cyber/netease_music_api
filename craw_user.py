@@ -9,18 +9,17 @@ netease music api
 from api import NetEase
 import MySQLdb
 import time
-import json
 import sys
 import threading
 
 
 joker = NetEase()
 user_info = {}
-local_account = 'betta551@163.com'
-local_password = 'c7236970bfc8e9f7aa83ad3d6d14d59a'
+local_account = 'oxp202@163.com'
+local_password = '36ed58c5c14dc2f58eef099585d2a939'
 
-#login_info = joker.login(local_account, local_password)
-#print login_info
+login_info = joker.login(local_account, local_password)
+print login_info
 
 def save2sql(conn, data):
     cur = conn.cursor()
@@ -77,7 +76,7 @@ def craw(start, limit):
 #     args: 函数参数
 #     """
 #     def __init__(self, target, args):
-#         super(MyThread, self).__init__()  #调用父类的构造函数 
+#         super(MyThread, self).__init__()  #调用父类的构造函数
 #         self.target = target
 #         self.args = args
 

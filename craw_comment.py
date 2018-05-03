@@ -16,11 +16,11 @@ import time
 
 joker = NetEase()
 user_info = {}
-local_account = 'betta551@163.com'
-local_password = 'c7236970bfc8e9f7aa83ad3d6d14d59a'
+local_account = 'lightstrawberry@163.com'
+local_password = '3ca73b783f9735a749bb0192face29f3'
 
-#login_info = joker.login(local_account, local_password)
-#print login_info
+login_info = joker.login(local_account, local_password)
+print login_info
 
 def save2sql(conn, data, song_id):
     try:
@@ -41,11 +41,13 @@ conn = MySQLdb.Connect(host = '127.0.0.1',
                        user = 'root',
                        passwd = 'root',
                        db = 'netease',
-                       charset = 'utf8')
+                       charset = 'utf8mb4'
+                       )
 
 cur = conn.cursor()
+cur.execute("SET NAMES utf8mb4")
 #sql = "SELECT song_id from netease_music_songs where id > (select song_id from netease_music_comments order by id desc limit 1)"
-sql = "SELECT song_id from netease_music_songs where id > 186664 order by id "
+sql = "SELECT song_id from netease_music_songs where id > 207483 order by id "
 cur.execute(sql)
 result=cur.fetchall()
 

@@ -48,11 +48,11 @@ CREATE TABLE `netease_music_songs` (
 CREATE TABLE `netease_music_comments` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `song_id` int(11) NOT NULL,
-  `content` varchar(512) DEFAULT NULL,
+  `content` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `liked_count` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
   `comment_id` int(11) NOT NULL UNIQUE,
-  `send_time` timestamp DEFAULT 0,
+  `send_time` timestamp NOT NULL DEFAULT '1970-01-02 00:00:00',
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)

@@ -16,7 +16,7 @@ from bs4 import BeautifulSoup
 import time
 import hashlib
 import base64
-from gettoken import get_token
+from gettoken import get_token, get_check_token
 from storage import Storage
 
 
@@ -198,6 +198,28 @@ class NetEase:
             return self.httpRequest('Login_POST', action, data)
         except:
             return {'code': 501}
+
+
+    def login_v2(self, username, password):
+        pattern = re.compile(r'^0\d{2,3}\d{7,8}$|^1[34578]\d{9}$')
+        if (pattern.match(username)):
+            return self.phone_login(username, password)
+        checkToken = get_check_token()
+        print checkToken
+        action = 'http://music.163.com/weapi/login'
+        text = {
+            'username': username,
+            'password': password,
+            'rememberLogin': 'true',
+            'checkToken': checkToken
+        }
+        data = encrypted_request(text)
+        print data
+        try:
+            return self.httpRequest('Login_POST', action, data)
+        except:
+            return {'code': 501}
+
 
     # 手机登录
     def phone_login(self, username, password):

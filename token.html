@@ -9,21 +9,18 @@
     var wm = null;
     // 初始化SDK，只需初始化一次
     // auto使用默认值，即自动化模式
-    initWatchman({
-        productNumber: 'YD00000558929251',
-        onload: function (instance) {
-            wm = instance
-        }
-    });
+    // initWatchman({
+    //     productNumber: 'YD00000558929251',
+    //     onload: function (instance) {
+    //         wm = instance
+    //     }
+    // });
 
     function submit(token) {
         var data = {
             "token": token
         };
         console.log(data)
-        $.post("rise.do", data, function(data) {
-            // 处理点赞的响应
-        });
     }
 
     // 处理点赞业务

@@ -11,39 +11,44 @@ import MySQLdb
 import time
 import sys
 import threading
+from change_user import change_user
 
 
 joker = NetEase()
 user_info = {}
-local_account = 'oxp202@163.com'
-local_password = '36ed58c5c14dc2f58eef099585d2a939'
+#local_account = 'oxp202@163.com'
+#local_password = '36ed58c5c14dc2f58eef099585d2a939'
+local_account = 'betta551@163.com'
+local_password = 'c7236970bfc8e9f7aa83ad3d6d14d59a'
 
 login_info = joker.login(local_account, local_password)
 print login_info
 
 def save2sql(conn, data):
     cur = conn.cursor()
-    try:
-        sql = (
-            "INSERT INTO netease_music_users (user_id, nick_name, signature, user_type, gender, follows, followeds, province, city, avatar_url, background_url, level, listen_songs, vip_type, expert_tags, people_can_see_playrecord, birthday) "
-            "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
-        )
-        if data['profile']['birthday'] > 0:
-            time_tmp = time.localtime(data['profile']['birthday']/1000)
-            birthday = time.strftime("%Y-%m-%d %H:%M:%S", time_tmp)
-        else:
-            birthday = "1970-01-02 00:00:00"
-        if data['profile']['expertTags']:
-            expert_tags = '-'.join(data['profile']['expertTags'])
-        else:
-            expert_tags = ''
-        sql_data = (data['profile']['userId'], data['profile']['nickname'], data['profile']['signature'], data['profile']['userType'], data['profile']['gender'], data['profile']['follows'],\
-        data['profile']['followeds'], data['profile']['province'], data['profile']['city'], data['profile']['avatarUrl'], data['profile']['backgroundUrl'],\
-        data['level'], data['listenSongs'], data['profile']['vipType'], expert_tags, data['peopleCanSeeMyPlayRecord'], birthday)
-        cur.execute(sql, sql_data)
-        conn.commit()
-    except Exception, e:
-        print Exception, ":", e
+    if data:
+        try:
+            sql = (
+                "INSERT INTO netease_music_users (user_id, nick_name, signature, user_type, gender, follows, followeds, province, city, avatar_url, background_url, level, listen_songs, vip_type, expert_tags, people_can_see_playrecord, birthday) "
+                "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+            )
+            if data['profile']['birthday'] > 0:
+                time_tmp = time.localtime(data['profile']['birthday']/1000)
+                birthday = time.strftime("%Y-%m-%d %H:%M:%S", time_tmp)
+            else:
+                birthday = "1970-01-02 00:00:00"
+            if data['profile']['expertTags']:
+                expert_tags = '-'.join(data['profile']['expertTags'])
+            else:
+                expert_tags = ''
+            sql_data = (data['profile']['userId'], data['profile']['nickname'], data['profile']['signature'], data['profile']['userType'], data['profile']['gender'], data['profile']['follows'],\
+            data['profile']['followeds'], data['profile']['province'], data['profile']['city'], data['profile']['avatarUrl'], data['profile']['backgroundUrl'],\
+            data['level'], data['listenSongs'], data['profile']['vipType'], expert_tags, data['peopleCanSeeMyPlayRecord'], birthday)
+            print sql_data
+            cur.execute(sql, sql_data)
+            conn.commit()
+        except Exception, e:
+            print Exception, ":", e
 
 def craw(start, limit):
     print  'sub thread start!the thread name is:%s ' % threading.currentThread().getName()
@@ -61,11 +66,13 @@ def craw(start, limit):
         print "user_id %s" % (s)
         detail = joker.user_detail(s)
         print detail
-        if detail:
+        if detail.get('code') == 406:
+            change_user()
+        elif detail.get('code') == 200:
             save2sql(conn, detail)
         else:
             print "no detail %s" % (s)
-        time.sleep(0.5)
+        time.sleep(1)
 
     conn.close()
 

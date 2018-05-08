@@ -14,6 +14,7 @@ from Crypto.Cipher import AES
 from cookielib import LWPCookieJar
 from bs4 import BeautifulSoup
 import time
+import random
 import hashlib
 import base64
 from gettoken import get_token, get_check_token
@@ -80,32 +81,15 @@ def uniq(arr):
     return arr2
 
 
-# 获取高音质mp3 url
-# def geturl(song):
-#     config = Config()
-#     quality = Config().get_item("music_quality")
-#     if song['hMusic'] and quality <= 0:
-#         music = song['hMusic']
-#         quality = 'HD'
-#     elif song['mMusic'] and quality <= 1:
-#         music = song['mMusic']
-#         quality = 'MD'
-#     elif song['lMusic'] and quality <= 2:
-#         music = song['lMusic']
-#         quality = 'LD'
-#     else:
-#         return song['mp3Url'], ''
-#
-#
-#     quality = quality + ' {0}k'.format(music['bitrate'] / 1000)
-#     song_id = str(music['dfsId'])
-#     enc_id = encrypted_id(song_id)
-#     url = "http://m%s.music.126.net/%s/%s.mp3" % (random.randrange(1, 3), enc_id, song_id)
-#     return url, quality
-
-
 class NetEase:
     def __init__(self):
+        self.userAgent_list = [
+            "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:52.0) Gecko/20100101 Firefox/52.0",
+            "Mozilla/5.0 (Windows NT 6.3; Win64, x64; Trident/7.0; rv:11.0) like Gecko",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/13.10586",
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.12; rv:46.0) Gecko/20100101 Firefox/46.0",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:46.0) Gecko/20100101 Firefox/46.0",
+        ]
         self.header = {
             'Accept': '*/*',
             'Accept-Encoding': 'gzip, deflate',
@@ -204,7 +188,8 @@ class NetEase:
         pattern = re.compile(r'^0\d{2,3}\d{7,8}$|^1[34578]\d{9}$')
         if (pattern.match(username)):
             return self.phone_login(username, password)
-        checkToken = get_check_token()
+        # checkToken = get_check_token()
+        checkToken = ""
         print checkToken
         action = 'http://music.163.com/weapi/login'
         text = {
@@ -735,10 +720,11 @@ class NetEase:
             req = {
                 "csrf_token": csrf
             }
-            page = self.session.post(action, data=encrypted_request(req), headers=self.header, timeout=default_timeout)
+            random_header = self.header
+            random_header['User-Agent'] = random.choice(self.userAgent_list)
+            page = self.session.post(action, data=encrypted_request(req), headers=random_header, timeout=default_timeout)
             results = json.loads(page.text)
-            if results["code"] == 200:
-                return results
+            return results
         except:
             return []
 

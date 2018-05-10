@@ -13,15 +13,8 @@ import sys
 import threading
 from change_user import change_user
 
-
 joker = NetEase()
-user_info = {}
-#local_account = 'oxp202@163.com'
-#local_password = '36ed58c5c14dc2f58eef099585d2a939'
-local_account = 'betta551@163.com'
-local_password = 'c7236970bfc8e9f7aa83ad3d6d14d59a'
-
-login_info = joker.login(local_account, local_password)
+login_info = change_user()
 print login_info
 
 def save2sql(conn, data):
@@ -66,7 +59,9 @@ def craw(start, limit):
         print "user_id %s" % (s)
         detail = joker.user_detail(s)
         print detail
-        if detail.get('code') == 406:
+        print 'sub thread start!the thread name is:%s ' % threading.currentThread().getName()
+        if detail.get('code') == -460:
+            print 'change user'
             change_user()
         elif detail.get('code') == 200:
             save2sql(conn, detail)

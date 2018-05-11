@@ -62,7 +62,10 @@ def craw(start, limit):
         print 'sub thread start!the thread name is:%s ' % threading.currentThread().getName()
         if detail.get('code') == -460:
             print 'change user'
-            change_user()
+            try:
+                change_user()
+            except Exception, e:
+                print Exception, ":", e
         elif detail.get('code') == 200:
             save2sql(conn, detail)
         else:

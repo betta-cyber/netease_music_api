@@ -13,6 +13,9 @@ import sys
 import threading
 from change_user import change_user
 
+
+cookie_path = "~/.netease-music_api/cookie"
+#login
 joker = NetEase()
 login_info = change_user()
 print login_info

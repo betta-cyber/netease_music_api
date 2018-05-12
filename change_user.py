@@ -5,6 +5,7 @@ import random
 import hashlib
 from api import NetEase
 
+cookie_path = "~/.netease-music_api/cookie"
 
 def md5(passwd):
     md = hashlib.md5()
@@ -13,7 +14,8 @@ def md5(passwd):
 
 
 def change_user():
-    file = open('163.md')
+    #file = open('163.md')
+    file = open('account.txt')
     try:
         alist = file.read()
     finally:

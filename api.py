@@ -726,7 +726,7 @@ class NetEase:
             results = json.loads(page.text)
             return results
         except:
-            return []
+            return {'code': -1}
 
 
     # song ids --> song urls ( details )
